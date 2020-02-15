@@ -1,55 +1,59 @@
 # Load packages
-source("C:\\Users\\Jerome\\Desktop\\JeromeR.R")
-
-
 library(keras)
 library(EBImage)
 library(wvtool)
+wtf <- function(x) {
+  tmpfile = strsplit(tempfile(), split = "[\\]") %>% unlist %>% head(7) %>% paste(collapse = '/')
+  tempfile2 = deparse(substitute(x))
+  fn = paste(tmpfile, tempfile2, sep = '/')
+  x2 = as.data.frame(x)
+  out = try(write.table(x2, file = paste0(fn,".csv"), sep = ",", row.names = F, col.names = T))
+  if (class(out) == "try-error") {
+    DefaultTotemp <- tempfile()
+    write.table(x2, file = paste0(DefaultTotemp,".csv"), sep = ",", row.names = F, col.names = T)
+    shell.exec(paste0(DefaultTotemp, ".csv"))
+  } else {
+    shell.exec(paste0(fn, ".csv"))
+  }
+}
+
+# set wd
+setwd('C:\\Users\\Jerome\\Capstone')
+trainfiles <- paste0(paste0(getwd(), "\\Train_Imgs\\"), list.files(path = paste0(getwd(), "\\Train_Imgs")))
+testfiles <- paste0(paste0(getwd(), "\\Test_Imgs\\"), list.files(path = paste0(getwd(), "\\Test_Imgs")))
+map1 <- paste0(paste0(getwd(), "\\Maps1_T\\"), list.files(path = paste0(getwd(), "\\Maps1_T")))
+map2 <- paste0(paste0(getwd(), "\\Maps2_T\\"), list.files(path = paste0(getwd(), "\\Maps2_T")))
+map3 <- paste0(paste0(getwd(), "\\Maps3_T\\"), list.files(path = paste0(getwd(), "\\Maps3_T")))
+map4 <- paste0(paste0(getwd(), "\\Maps4_T\\"), list.files(path = paste0(getwd(), "\\Maps4_T")))
+map5 <- paste0(paste0(getwd(), "\\Maps5_T\\"), list.files(path = paste0(getwd(), "\\Maps5_T")))
+map6 <- paste0(paste0(getwd(), "\\Maps6_T\\"), list.files(path = paste0(getwd(), "\\Maps6_T")))
 
 
-test = readImage(trainfiles[1])
-test2 <- resize(test, 100, 100)
-hist(test2)
+# simple exploration (map)
+img = readImage(map1[1])
+img <- resize(img, 500, 500)
+str(img)
+hist(img)
 
-setwd('C:\\Users\\Jerome\\Desktop\\NUS Masters of Technology\\Capstone\\')
-img = readImage("C:\\Users\\Jerome\\Desktop\\NUS Masters of Technology\\Capstone\\Maps1_T\\slide001_core045_classimg_nonconvex.png")
-img2 <- resize(img, 500, 500)
-wtf(img2@.Data)
-hist(img2)
-
-
-test2 <- array_reshape(test, c(500,500,3))
-test2 <- as.matrix(resize(test, 1000, 1000))
-
-edge.detect(test2)
-
-# Read Images
-setwd('C:\\Users\\Jerome\\Desktop\\NUS Masters of Technology\\Capstone\\Train_Imgs')
-trainfiles <- list.files(path = "C:\\Users\\Jerome\\Desktop\\NUS Masters of Technology\\Capstone\\Train_Imgs", 
-                    pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, 
-                    ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
-
-train <- list()
-for (i in 1:10) {train[[i]] <- readImage(trainfiles[i])}
-
-testfiles <- list.files(path = "C:\\Users\\Jerome\\Desktop\\NUS Masters of Technology\\Capstone\\Test_Imgs", 
-                         pattern = NULL, all.files = FALSE, full.names = FALSE, recursive = FALSE, 
-                         ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
-
-test <- list()
-for (i in 1:length(testfiles)) {test[[i]] <- readImage(testfiles[i])}
+# simple exploration (train and test images which are the same type)
+img = readImage(trainfiles[1])
+img <- resize(img, 500, 500)
+str(img)
+hist(img)
 
 
+# number of classes (what do they mean?)
+res <- c()
+for (i in 1:length(map1)) {
+  unclean = readImage(map1[i])
+  cleaned <- resize(unclean, 500, 500)
+  cleaned <- round(cleaned*255)
+  temp <- which.max(table(as.numeric(cleaned))[-1])
+  res <- c(res, temp)
+  print(sprintf("%s out of 244 done", i))
+}
 
 
-
-
-# Explore
-print(train[[10]])
-summary(train[[10]])
-display(train[[10]])
-plot(train[[2]])
-hist(train[[1]])
 
 # Resize & combine
 str(train)
@@ -78,38 +82,38 @@ testy <- c(0, 1, 2)
 trainLabels <- ---(trainy)
 testLabels <- ---(testy)
 
-# Model
-model <- keras_model_sequential()
 
-model %>%
-  layer_conv_2d(filters = 32, 
-                kernel_size = c(3,3),
-                activation = 'relu',
-                input_shape = c(100, 100, 3)) %>%
-  (filters = 32, kernel_size = c(3,3),
-      activation = 'relu') %>%
-  ---(pool_size = c(2,2)) %>%
-  ---(rate = 0.25) %>%
-  layer_conv_2d(filters = 64,
-                kernel_size = c(3,3),
-                activation = 'relu') %>%
-  layer_conv_2d(filters = 64,
-                kernel_size = c(3,3),
-                activation = 'relu') %>%
-  layer_max_pooling_2d(pool_size = c(2,2)) %>%
-  layer_dropout(rate = 0.25) %>%
-  ---() %>%
-  layer_dense(units = 256, activation = 'relu') %>%
-  layer_dropout(rate=0.25) %>%
-  layer_dense(units = 3, activation = '---') %>%
-  
-  compile(loss = '---',
-          optimizer = optimizer_sgd(lr = 0.01,
-                                    decay = 1e-6,
-                                    momentum = 0.9,
-                                    nesterov = T),
-          metrics = c('---'))
-summary(model)
+## Modeling 
+# model <- keras_model_sequential()
+# model %>%
+#   layer_conv_2d(filters = 32, 
+#                 kernel_size = c(3,3),
+#                 activation = 'relu',
+#                 input_shape = c(100, 100, 3)) %>%
+#   (filters = 32, kernel_size = c(3,3),
+#       activation = 'relu') %>%
+#   ---(pool_size = c(2,2)) %>%
+#   ---(rate = 0.25) %>%
+#   layer_conv_2d(filters = 64,
+#                 kernel_size = c(3,3),
+#                 activation = 'relu') %>%
+#   layer_conv_2d(filters = 64,
+#                 kernel_size = c(3,3),
+#                 activation = 'relu') %>%
+#   layer_max_pooling_2d(pool_size = c(2,2)) %>%
+#   layer_dropout(rate = 0.25) %>%
+#   ---() %>%
+#   layer_dense(units = 256, activation = 'relu') %>%
+#   layer_dropout(rate=0.25) %>%
+#   layer_dense(units = 3, activation = '---') %>%
+#   
+#   compile(loss = '---',
+#           optimizer = optimizer_sgd(lr = 0.01,
+#                                     decay = 1e-6,
+#                                     momentum = 0.9,
+#                                     nesterov = T),
+#           metrics = c('---'))
+# summary(model)
 
 # Fit model
 history <- model %>%
