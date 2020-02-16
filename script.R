@@ -55,32 +55,28 @@ for (i in 1:length(map1)) {
 
 
 
-# Resize & combine
-str(train)
-for (i in 1:10) {train[[i]] <- resize(train[[i]], 100, 100)}
+# Resize & and size new dimension pics
+resizeImagesAndSave <- function(InputDrive, outputDrive, l, w) {
+  files <- list.files(path = InputDrive)
+  res <- list()
+  for (i in 1:length(files)) {
+    img <- readImage(paste0(InputDrive, "/", files[i]))
+    img <- resize(img, l, w)
+    writeImage(img, file = paste0(outputDrive, "/", files[i]))
+    print(sprintf("%s ------ %s of out %s done", InputDrive, i, length(files)))
+  }
+  gc()
+}
 
-for (i in 1:3) {test[[i]] <- resize(test[[i]], 100, 100)}
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Maps1_T", "C:\\Users\\Jerome\\Capstone\\Maps1_T_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Maps2_T", "C:\\Users\\Jerome\\Capstone\\Maps2_T_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Maps3_T", "C:\\Users\\Jerome\\Capstone\\Maps3_T_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Maps4_T", "C:\\Users\\Jerome\\Capstone\\Maps4_T_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Maps5_T", "C:\\Users\\Jerome\\Capstone\\Maps5_T_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Maps6_T", "C:\\Users\\Jerome\\Capstone\\Maps6_T_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Train_imgs", "C:\\Users\\Jerome\\Capstone\\Train_imgs_resized", 500, 500)
+resizeImagesAndSave("C:\\Users\\Jerome\\Capstone\\Test_imgs", "C:\\Users\\Jerome\\Capstone\\Test_imgs_resized", 500, 500)
 
-train <- combine(train)
-x <- tile(train, 5)
-display(x, title='Pictures')
-
-test <- ---(test)
-y <- ---(test, 3)
----(y, title = 'Pics')
-
-# Reorder dimension
-train <- ---(train, c(4, 1, 2, 3))
-test <- ---(test, c(4, 1, 2, 3))
-str(train)
-
-# Response
-trainy <- c(0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2)
-testy <- c(0, 1, 2)
-
-# One hot encoding
-trainLabels <- ---(trainy)
-testLabels <- ---(testy)
 
 
 ## Modeling 
