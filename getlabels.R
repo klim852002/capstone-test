@@ -60,4 +60,5 @@ res$final <- apply(res[, c(2,3)], 1, function(x) max(x, na.rm = T))
 res2 <- res %>% group_by(coreNameFinal) %>% summarise(final_label = getmode(final), num_pathologist_labelled = n()) %>% as.data.table
 table(res2$final_label)
 
+save(res2, file = "C:\\Users\\Jerome\\Desktop\\NUS Masters of Technology\\Capstone\\LabelledMapsUsingMax_ThenTakeMode.RData")
 
