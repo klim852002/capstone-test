@@ -35,7 +35,6 @@ model %>%
   layer_dense(units = 256, activation = 'relu') %>%
   layer_dropout(rate=0.25) %>%
   layer_dense(units = 3, activation = 'softmax') %>%
-
   compile(loss = 'categorical_crossentropy',
           optimizer = optimizer_sgd(lr = 0.01,
                                     decay = 1e-6,
@@ -75,16 +74,14 @@ history <- model %>% fit(
 )
 
 
-library(tensorflow)
-library(keras)
-library(stringr)
-library(readr)
-library(purrr)
-library(caret)
 
-#cifar <- dataset_cifar10()
+
 
 ############################################################################
+library(keras)
+library(caret)
+library(data.table)
+#cifar <- dataset_cifar10()
 
 train_data <- scale(cifar$train$x)
 dim(train_data) <- c(50000,32,32,3)
@@ -103,55 +100,36 @@ dim(test_label) <- c(10000)
 class_names <- c('airplane', 'automobile', 'bird', 'cat', 'deer',
                  'dog', 'frog', 'horse', 'ship', 'truck')
 
-index <- 1:30
-
 model <- keras_model_sequential() %>% 
   layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = "relu", input_shape = c(32,32,3)) %>% 
   layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = "relu") %>% 
   layer_max_pooling_2d(pool_size = c(2,2)) %>% 
   layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = "relu") %>%
   layer_max_pooling_2d(pool_size = c(2,2)) %>% 
-  layer_flatten() %>%
-  compile(
-    optimizer = "adam",
-    loss = "sparse_categorical_crossentropy",
-    metrics = "accuracy")
-summary(model)
-
-history = model %>% 
-  fit(
-    x = train_data[1:1000, 1:32, 1:32, 1:3], y = train_label[1:1000],
-    epochs = 1,
-    validation_split=0.2,
-    use_multiprocessing=TRUE
-  )
-
-model$get_layer("flatten_9")
-layer_name <- 'flatten_9'
-intermediate_layer_model <- keras_model(inputs = model$input,
-                                        outputs = get_layer(model, layer_name)$output)
-intermediate_output <- predict(intermediate_layer_model, train_data[1:1000, 1:32, 1:32, 1:3])
-length(intermediate_output[1,])
-hist(intermediate_output[1,])
-w = model$get_weights()
-w[[2]]
-
-
-
-summary(model)
-
-model %>% 
   layer_flatten() %>% 
-  layer_dense(units = 256, activation = "relu") %>% 
-  layer_dense(units = 128, activation = "relu") %>% 
-  layer_dense(units = 64, activation = "relu") %>% 
-  layer_dense(units = 10, activation = "softmax")
+  compile(optimizer = "adam", 
+          loss = "sparse_categorical_crossentropy",
+          metrics = "accuracy") 
+
+history <-  model %>% 
+  fit(train_data, train_label,
+  validation_split = 0.2, 
+  epoch = 30, batch_size = 128)
 
 summary(model)
 
-model %>% compile(
-  optimizer = "adam",
-  loss = "sparse_categorical_crossentropy",
-  metrics = "accuracy"
-)
+output <- predict(model, train_data[1:10000,,,])
+pca <- prcomp(output, center = T)
+dim(pca$x)
+
+summaryPCA <- summary(pca)
+plot <- data.table(raw = summaryPCA$sdev^2, sum= cumsum(summaryPCA$sdev^2))
+plot$pct <- plot$sum/max(plot$sum)
+ggplot(plot) + geom_line(aes(x = 1:2304, y = raw), color = COLO) + 
+  
+
+for (i in 1:1000) {
+  tempModel <- 
+}
+
 
